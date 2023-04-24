@@ -1,8 +1,28 @@
 import os
+import numpy as np
+from datetime import date
+from ecommerce.customer import Audience
+from ecommerce.products import Products
 
 
 if __name__ == "__main__":
+    # Definição de parâmetros para gestão de arquivos
     base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
+
+    # Cria o conjunto de clientes e produtos para realização de transações
+    products = Products()
+    audience = Audience(100)
+    customers = audience.create()
+
+    # Define intervalo de tempo e parâmetros de controle
+    start_date = date(2022, 1, 1)
+    end_date = date(2023, 4, 30)
+    current_date = start_date
+
+    purchase_p = 0.05
+
+    while current_date <= end_date:
+        sales = np.random.randint(10, 26)
 
     '''
     Base 1: é preciso ter uma lista de 100 clientes com o total gasto, número de compras,

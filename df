@@ -1,0 +1,34 @@
+Help on package names:
+
+NNAAMMEE
+    names
+
+PPAACCKKAAGGEE  CCOONNTTEENNTTSS
+    main
+
+FFUUNNCCTTIIOONNSS
+    ffuullll__ppaatthh lambda filename
+    
+    ggeett__ffiirrsstt__nnaammee(gender=None)
+    
+    ggeett__ffuullll__nnaammee(gender=None)
+    
+    ggeett__llaasstt__nnaammee()
+    
+    ggeett__nnaammee(filename)
+
+DDAATTAA
+    FFIILLEESS = {'first:female': '/media/bruno/Arquivos/Desenvolvimento/Laranj...
+    ____lliicceennssee____ = 'MIT'
+    ____ttiittllee____ = 'names'
+    uunniiccooddee__lliitteerraallss = _Feature((2, 6, 0, 'alpha', 2), (3, 0, 0, 'alpha', ...
+
+VVEERRSSIIOONN
+    0.3.0
+
+AAUUTTHHOORR
+    Trey Hunner
+
+FFIILLEE
+    /media/bruno/Arquivos/Desenvolvimento/LaranjaLima/.venv/lib/python3.10/site-packages/names/__init__.py
+
