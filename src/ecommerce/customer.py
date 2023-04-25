@@ -28,6 +28,11 @@ class Customer:
     
     def get_name(self) -> str:
         return self.__name
+    
+    def get_time(self) -> float:
+        limits = [(10, 60), (10, 30), (5, 30), (5, 20)]
+        vmin, vmax = limits[self.get_compulsivity() - 1]
+        return vmin + (vmax - vmin) * np.random.random_sample()
 
 
 class Audience:
@@ -72,7 +77,7 @@ class Audience:
         columns = ["Nome", "Identificador", "Nível de Compulsividade"]
         for customer in self.__customers:
             data.append([
-                names.get_full_name(),
+                customer.get_name(),
                 customer.get_id(),
                 customer.get_compulsivity()
             ])

@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import pandas as pd
 from datetime import date, timedelta
 from ecommerce.customer import Audience
 from ecommerce.products import Products, Marketing
@@ -29,17 +30,19 @@ if __name__ == "__main__":
         if (current_date - last_campaign).days >= 15:
             current_campaign = campaign.new_campaign()
             last_campaign = current_date
-            print(f"Iniciando campanha de marketing para {current_campaign.value} em {current_date.isoformat()}")
 
         # Determina a quantidade de vendas efetuadas no dia
         sales = np.random.randint(10, 26)
         for i in range(0, sales):
-            product, customer = products.sell(audience, campaign)
-            print(f"Vendendo {product.get_name()} para {customer.get_name()}")
+            product, customer = products.sell(audience, campaign, current_date)
 
         # Avança no tempo
         current_date = current_date + timedelta(days=1)
-        print()
+
+    # Salva os dados das vendas
+
+    with pd.ExcelWriter(f"{base_path}/data/ecommerce.xlsx", mode="a", if_sheet_exists="replace") as file:
+        products.get_purchases().to_excel(file, sheet_name="Vendas", index=False)
 
     '''
     Base 1: é preciso ter uma lista de 100 clientes com o total gasto, número de compras,

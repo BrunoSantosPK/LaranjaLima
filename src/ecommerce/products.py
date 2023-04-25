@@ -3,6 +3,7 @@ import pandas as pd
 from enum import Enum
 from uuid import uuid4
 from typing import List
+from datetime import date
 from ecommerce.customer import Audience
 
 
@@ -80,6 +81,7 @@ class Products:
 
     def __init__(self) -> None:
         self.__products: List[Product] = []
+        self.__hist = []
         self.__columns = ["Categoria", "Produto", "Preço Padrão (R$)", "Preço PIX (R$)"]
         self.__stock = [
             [Category.LIVRO, "Box Harry Potter 7 Livros - Capa Dura", 200, 178],
@@ -122,14 +124,37 @@ class Products:
     def get_products(self) -> List[Product]:
         return self.__products
     
-    def sell(self, audience: Audience, campaign: Marketing):
+    def get_purchases(self) -> pd.DataFrame:
+        return pd.DataFrame(self.__hist)
+    
+    def sell(self, audience: Audience, campaign: Marketing, dt: date):
+        # Seleciona um produto e verifica se ele faz parte da campanha de marketing
         product = self.select_product(campaign)
         in_campaign = True if product.get_category() == campaign.get_category().value else False
 
+        # Atribui o aumento de probabilidade de compra de acordo com a campanha de marketing
         lift = 4 if in_campaign else 2
         customer = audience.select_customer(lift=lift)
 
+        # Define método de compra e possível desconto
         pix_payment = True if np.random.random() < 0.5 else False
+        off = self.__off(pix_payment, in_campaign)
+        purchase_time = customer.get_time()
+        price = product.get_pix_price_off(off) if pix_payment else product.get_price_off(off)
+
+        # Registra os dados da venda
+        self.__hist.append({
+            "Data": dt,
+            "Campanha em Curso": campaign.get_category().value,
+            "Cliente": customer.get_id(),
+            "Categoria": product.get_category(),
+            "Produto": product.get_name(),
+            "Compra no PIX": "Sim" if pix_payment else "Não",
+            "Desconto Aplicado (%)": round(off * 100, 2),
+            "Preço de Venda (R$)": round(price, 2),
+            "Tempo de Finalização de compra (min)": round(purchase_time, 1)
+        })
+
         return product, customer
     
     def select_product(self, campaign: Marketing) -> Product:
@@ -145,3 +170,11 @@ class Products:
     def __generate(self) -> None:
         for category, name, price, pix in self.__stock:
             self.__products.append(Product(category, name, price, pix))
+
+    def __off(self, pix: bool, mkt: bool) -> float:
+        value = 0
+        if pix and not mkt: value = 0.03 + 0.03 * np.random.random_sample()
+        if pix and mkt: value = 0.08 + 0.04 * np.random.random_sample()
+        if not pix and mkt: value = 0.03 + 0.04 * np.random.random_sample()
+        if not pix and not mkt: value = 0 if np.random.random_sample() > 0.1 else 0.03
+        return value

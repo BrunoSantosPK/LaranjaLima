@@ -3,6 +3,7 @@ import pandas as pd
 
 class IPCA:
 
+    @staticmethod
     def get_value(self, year: int, month: int) -> float:
         pass
     
