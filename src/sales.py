@@ -1,8 +1,8 @@
 import os
 import numpy as np
-from datetime import date
+from datetime import date, timedelta
 from ecommerce.customer import Audience
-from ecommerce.products import Products
+from ecommerce.products import Products, Marketing
 
 
 if __name__ == "__main__":
@@ -19,10 +19,27 @@ if __name__ == "__main__":
     end_date = date(2023, 4, 30)
     current_date = start_date
 
-    purchase_p = 0.05
+    # Define sistema de campanhas de marketing
+    interval = 15
+    campaign = Marketing()
+    last_campaign = start_date - timedelta(days=interval)
 
     while current_date <= end_date:
+        # Caso o intervalo entre campanhas de marketing seja atingido, cria uma nova
+        if (current_date - last_campaign).days >= 15:
+            current_campaign = campaign.new_campaign()
+            last_campaign = current_date
+            print(f"Iniciando campanha de marketing para {current_campaign.value} em {current_date.isoformat()}")
+
+        # Determina a quantidade de vendas efetuadas no dia
         sales = np.random.randint(10, 26)
+        for i in range(0, sales):
+            product, customer = products.sell(audience, campaign)
+            print(f"Vendendo {product.get_name()} para {customer.get_name()}")
+
+        # Avança no tempo
+        current_date = current_date + timedelta(days=1)
+        print()
 
     '''
     Base 1: é preciso ter uma lista de 100 clientes com o total gasto, número de compras,

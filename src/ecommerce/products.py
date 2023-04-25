@@ -1,7 +1,9 @@
+import numpy as np
 import pandas as pd
 from enum import Enum
 from uuid import uuid4
 from typing import List
+from ecommerce.customer import Audience
 
 
 class Category(Enum):
@@ -10,6 +12,37 @@ class Category(Enum):
     INFORMATICA = "Informática"
     ELETRODOMESTICO = "Eletrodomésticos"
     MOVEL = "Móveis"
+
+
+class Marketing:
+    
+    def __init__(self, lift=3) -> None:
+        self.__sequence = [Category.LIVRO, Category.GAME, Category.INFORMATICA, Category.ELETRODOMESTICO, Category.MOVEL]
+        self.__current = -1
+        self.__lift = lift
+
+    def get_category(self) -> Category:
+        return self.__sequence[self.__current]
+
+    def new_campaign(self) -> Category:
+        while True:
+            i = np.random.randint(0, len(self.__sequence))
+            if i != self.__current:
+                self.__current = i
+                break
+        return self.__sequence[i]
+    
+    def select_category(self) -> Category:
+        possibilities: List[Category] = []
+        for i in range(0, len(self.__sequence)):
+            if i == self.__current:
+                for j in range(0, self.__lift):
+                    possibilities.append(self.__sequence[i])
+            else:
+                possibilities.append(self.__sequence[i])
+
+        k = np.random.randint(0, len(possibilities))
+        return possibilities[k]
 
 
 class Product:
@@ -88,6 +121,26 @@ class Products:
     
     def get_products(self) -> List[Product]:
         return self.__products
+    
+    def sell(self, audience: Audience, campaign: Marketing):
+        product = self.select_product(campaign)
+        in_campaign = True if product.get_category() == campaign.get_category().value else False
+
+        lift = 4 if in_campaign else 2
+        customer = audience.select_customer(lift=lift)
+
+        pix_payment = True if np.random.random() < 0.5 else False
+        return product, customer
+    
+    def select_product(self, campaign: Marketing) -> Product:
+        category = campaign.select_category()
+        possibilities: List[Product] = []
+
+        for product in self.__products:
+            if product.get_category() == category.value:
+                possibilities.append(product)
+
+        return possibilities[np.random.randint(0, len(possibilities))]
 
     def __generate(self) -> None:
         for category, name, price, pix in self.__stock:

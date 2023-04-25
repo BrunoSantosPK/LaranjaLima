@@ -18,12 +18,16 @@ class Customer:
     def __init__(self, compulsivity: Compulsivity) -> None:
         self.__compulsivity = compulsivity
         self.__id = str(uuid4())
+        self.__name = names.get_full_name()
 
     def get_id(self) -> str:
         return self.__id
     
     def get_compulsivity(self) -> int:
         return self.__compulsivity.value
+    
+    def get_name(self) -> str:
+        return self.__name
 
 
 class Audience:
@@ -48,6 +52,20 @@ class Audience:
                 available[i] = available[i] - 1
         
         return self.__customers
+    
+    def select_customer(self, lift=2):
+        possibilities: List[Customer] = []
+        for customer in self.__customers:
+            if customer.get_compulsivity() in [1, 2]:
+                possibilities.append(customer)
+            elif customer.get_compulsivity() == 3:
+                for i in range(0, lift * 2):
+                    possibilities.append(customer)
+            elif customer.get_compulsivity() == 4:
+                for i in range(0, lift * 3):
+                    possibilities.append(customer)
+        
+        return possibilities[np.random.randint(0, len(possibilities))]
     
     def get_data(self) -> pd.DataFrame:
         data = []

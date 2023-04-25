@@ -2,6 +2,9 @@ import pandas as pd
 
 
 class IPCA:
+
+    def get_value(self, year: int, month: int) -> float:
+        pass
     
     def get() -> pd.DataFrame:
         return pd.DataFrame([
