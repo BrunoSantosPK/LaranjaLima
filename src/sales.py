@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     Base 3: os dados necessários são perfil de consumidor, preço do produto, categoria do produto,
     valor de desconto, vendas no último mês do produto, tempo desde a última promoção/campanha de
-    marketing para o produto e a quantidade vendida .
+    marketing para o produto e a quantidade vendida.
 
     Base 4: os dados necessários são produto foco da campanha de marketing, gasto com publicidade,
     público alvo (perfil de consumidor), vendas concluídas no último mês e valor total vendido na
