@@ -49,6 +49,7 @@ class Marketing:
 class Product:
 
     def __init__(self, category: Category, name: str, price: float, pix: float) -> None:
+        self.__id = str(uuid4())
         self.__category = category
         self.__name = name
         self.__price = price
@@ -77,7 +78,7 @@ class Product:
         return self.__pix * (1 - off)
 
 
-class Products:
+class Stock:
 
     def __init__(self) -> None:
         self.__products: List[Product] = []
@@ -116,6 +117,16 @@ class Products:
             [Category.MOVEL, "Cômoda 6 Gavetas", 575, 517.50]
         ]
         self.__generate()
+
+    def portfolio(self, category: Category, lift=3) -> List[Product]:
+        possibilities: List[Product] = []
+        for product in self.__products:
+            if product.get_category() == category.value:
+                for i in range(0, lift):
+                    possibilities.append(product)
+            else:
+                possibilities.append(product)
+        return possibilities
 
     def get_data(self) -> pd.DataFrame:
         data = [[p.get_category(), p.get_name(), p.get_price(), p.get_pix_price()] for p in self.__products]

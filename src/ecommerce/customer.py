@@ -58,7 +58,7 @@ class Audience:
         
         return self.__customers
     
-    def select_customer(self, lift=2):
+    def select_customer(self, lift=2) -> Customer:
         possibilities: List[Customer] = []
         for customer in self.__customers:
             if customer.get_compulsivity() in [1, 2]:
