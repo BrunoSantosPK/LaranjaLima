@@ -26,24 +26,16 @@ class Marketing:
         return self.__sequence[self.__current]
 
     def new_campaign(self) -> Category:
+        '''
+        Inicia uma nova campanha de marketing, tomando o cuidado de não repetir uma
+        categoria recentemente impulsionada.
+        '''
         while True:
             i = np.random.randint(0, len(self.__sequence))
             if i != self.__current:
                 self.__current = i
                 break
         return self.__sequence[i]
-    
-    def select_category(self) -> Category:
-        possibilities: List[Category] = []
-        for i in range(0, len(self.__sequence)):
-            if i == self.__current:
-                for j in range(0, self.__lift):
-                    possibilities.append(self.__sequence[i])
-            else:
-                possibilities.append(self.__sequence[i])
-
-        k = np.random.randint(0, len(possibilities))
-        return possibilities[k]
 
 
 class Product:
@@ -119,6 +111,12 @@ class Stock:
         self.__generate()
 
     def portfolio(self, category: Category, lift=3) -> List[Product]:
+        '''
+        Monta o portfólio de produtos informado ao cliente, podendo ser impulsionado
+        por meio de uma categoria específica, originada de uma possível campanha de
+        marketing. O lift é a quantidade de vezes que determinada categoria será
+        priorizada na hora de montar a lista de produtos.
+        '''
         possibilities: List[Product] = []
         for product in self.__products:
             if product.get_category() == category.value:
@@ -128,64 +126,6 @@ class Stock:
                 possibilities.append(product)
         return possibilities
 
-    def get_data(self) -> pd.DataFrame:
-        data = [[p.get_category(), p.get_name(), p.get_price(), p.get_pix_price()] for p in self.__products]
-        return pd.DataFrame(data, columns=self.__columns)
-    
-    def get_products(self) -> List[Product]:
-        return self.__products
-    
-    def get_purchases(self) -> pd.DataFrame:
-        return pd.DataFrame(self.__hist)
-    
-    def sell(self, audience: Audience, campaign: Marketing, dt: date):
-        # Seleciona um produto e verifica se ele faz parte da campanha de marketing
-        product = self.select_product(campaign)
-        in_campaign = True if product.get_category() == campaign.get_category().value else False
-
-        # Atribui o aumento de probabilidade de compra de acordo com a campanha de marketing
-        lift = 4 if in_campaign else 2
-        customer = audience.select_customer(lift=lift)
-
-        # Define método de compra e possível desconto
-        pix_payment = True if np.random.random() < 0.5 else False
-        off = self.__off(pix_payment, in_campaign)
-        purchase_time = customer.get_time()
-        price = product.get_pix_price_off(off) if pix_payment else product.get_price_off(off)
-
-        # Registra os dados da venda
-        self.__hist.append({
-            "Data": dt,
-            "Campanha em Curso": campaign.get_category().value,
-            "Cliente": customer.get_id(),
-            "Categoria": product.get_category(),
-            "Produto": product.get_name(),
-            "Compra no PIX": "Sim" if pix_payment else "Não",
-            "Desconto Aplicado (%)": round(off * 100, 2),
-            "Preço de Venda (R$)": round(price, 2),
-            "Tempo de Finalização de compra (min)": round(purchase_time, 1)
-        })
-
-        return product, customer
-    
-    def select_product(self, campaign: Marketing) -> Product:
-        category = campaign.select_category()
-        possibilities: List[Product] = []
-
-        for product in self.__products:
-            if product.get_category() == category.value:
-                possibilities.append(product)
-
-        return possibilities[np.random.randint(0, len(possibilities))]
-
     def __generate(self) -> None:
         for category, name, price, pix in self.__stock:
             self.__products.append(Product(category, name, price, pix))
-
-    def __off(self, pix: bool, mkt: bool) -> float:
-        value = 0
-        if pix and not mkt: value = 0.03 + 0.03 * np.random.random_sample()
-        if pix and mkt: value = 0.08 + 0.04 * np.random.random_sample()
-        if not pix and mkt: value = 0.03 + 0.04 * np.random.random_sample()
-        if not pix and not mkt: value = 0 if np.random.random_sample() > 0.1 else 0.03
-        return value

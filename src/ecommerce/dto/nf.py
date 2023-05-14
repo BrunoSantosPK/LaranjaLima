@@ -28,13 +28,15 @@ class NF:
     def to_json(self) -> List[dict]:
         data = []
         for info in self.__data:
-            price = info.product.get_pix_price_off(self.__off) if self.__pix_payment else info.product.get_price_off(self.__off)
+            price = info.product.get_pix_price_off(info.off) if self.__pix_payment else info.product.get_price_off(info.off)
             data.append({
-                "Data": self.__data,
+                "Data": self.__date,
+                "Nota": self.__id,
                 "Campanha em Curso": self.__mkt_category,
                 "Cliente": self.__customer.get_id(),
                 "Categoria": info.product.get_category(),
                 "Produto": info.product.get_name(),
+                "Quantidade": info.quantity,
                 "Compra no PIX": "Sim" if self.__pix_payment else "Não",
                 "Desconto Aplicado (%)": round(info.off * 100, 2),
                 "Preço de Venda (R$)": round(price, 2),

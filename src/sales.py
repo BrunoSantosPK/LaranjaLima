@@ -3,7 +3,8 @@ import numpy as np
 import pandas as pd
 from datetime import date, timedelta
 from ecommerce.customer import Audience
-from ecommerce.products import Products, Marketing
+from ecommerce.products import Stock, Marketing
+from ecommerce.site import Site
 
 
 if __name__ == "__main__":
@@ -11,9 +12,10 @@ if __name__ == "__main__":
     base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 
     # Cria o conjunto de clientes e produtos para realização de transações
-    products = Products()
+    stock = Stock()
+    site = Site(stock)
     audience = Audience(100)
-    customers = audience.create()
+    audience.create()
 
     # Define intervalo de tempo e parâmetros de controle
     start_date = date(2022, 1, 1)
@@ -25,24 +27,31 @@ if __name__ == "__main__":
     campaign = Marketing()
     last_campaign = start_date - timedelta(days=interval)
 
+    purchases = []
     while current_date <= end_date:
+        # Log de acompanhamento
+        p = round((current_date - start_date).days * 100 / (end_date - start_date).days, 2)
+        print(f"Simulação em {p}%", end="\r")
+
         # Caso o intervalo entre campanhas de marketing seja atingido, cria uma nova
         if (current_date - last_campaign).days >= 15:
             current_campaign = campaign.new_campaign()
             last_campaign = current_date
 
-        # Determina a quantidade de vendas efetuadas no dia
-        sales = np.random.randint(10, 26)
-        for i in range(0, sales):
-            product, customer = products.sell(audience, campaign, current_date)
+        # De uma sequência de visitas, encontra quantos clientes realizaram compra,
+        # seguindo com o fluxo de venda e obtenção de dados da nota
+        customers = site.select_customers(audience)
+        for customer in customers:
+            cart = site.make_cart(campaign, customer)
+            nf = site.execute_purchase(cart, campaign, current_date)
+            purchases.extend(nf.to_json())
 
         # Avança no tempo
         current_date = current_date + timedelta(days=1)
 
     # Salva os dados das vendas
-
     with pd.ExcelWriter(f"{base_path}/data/ecommerce.xlsx", mode="a", if_sheet_exists="replace") as file:
-        products.get_purchases().to_excel(file, sheet_name="Vendas", index=False)
+        pd.DataFrame(purchases).to_excel(file, sheet_name="Vendas", index=False)
 
     '''
     Base 1: é preciso ter uma lista de 100 clientes com o total gasto, número de compras,

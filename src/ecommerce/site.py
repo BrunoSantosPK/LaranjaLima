@@ -1,23 +1,41 @@
 import numpy as np
 from uuid import uuid4
 from typing import List
+from datetime import date
 from ecommerce.products import Stock, Marketing, Product
 from ecommerce.customer import Audience, Customer
-from ecommerce.dto.nf import NF
+from ecommerce.dto.nf import NF, InfoNF
 
 
 class Cart:
     def __init__(self) -> None:
         self.__products: List[Product] = []
+        self.__time_purchase = None
+        self.__customer = None
 
     def add(self, product: Product) -> None:
         self.__products.append(product)
+
+    def set_time(self, time: float) -> None:
+        self.__time_purchase = time
+
+    def set_customer(self, customer: Customer) -> None:
+        self.__customer = customer
 
     def total(self) -> float:
         value = 0
         for product in self.__products:
             value = value + product.get_price()
         return value
+    
+    def get_time(self) -> float:
+        return self.__time_purchase
+    
+    def get_customer(self) -> Customer:
+        return self.__customer
+    
+    def get_items(self) -> List[Product]:
+        return self.__products
     
     def to_string(self):
         name = ""
@@ -52,8 +70,9 @@ class Site:
         produtos que estão mais disponíveis para a compra, ou seja, aumenta a sua
         probabilidade de compra por meio de mais exposição.
         '''
-
         cart = Cart()
+        cart.set_time(customer.get_time())
+        cart.set_customer(customer)
         more = True
 
         category = marketing.get_category()
@@ -71,19 +90,18 @@ class Site:
 
         return cart
 
-    def execute_purchase(self, cart: Cart) -> NF:
+    def execute_purchase(self, cart: Cart, marketing: Marketing, dt: date) -> NF:
         '''
         Dado um carrinho montado, define o método de pagamento (PIX ou não) e para
         cada produto verifica a disponibilidade de desconto (por produto).
         '''
         pix_payment = True if np.random.random_sample() < 0.5 else False
         off = 0 + 0.03 * np.random.random_sample()
-        if pix_payment: off = 0.05 + 0.05 * np.random.random_sample()
+        if pix_payment:
+            off = 0.05 + 0.05 * np.random.random_sample()
 
-        pass
+        nf = NF(dt, marketing.get_category().value, pix_payment, cart.get_customer())
+        for product in cart.get_items():
+            nf.add(InfoNF(product, off, cart.get_time(), 1))
 
-
-if __name__ == "__main__":
-    site = Site()
-    site.visits()
-    print(site)
+        return nf

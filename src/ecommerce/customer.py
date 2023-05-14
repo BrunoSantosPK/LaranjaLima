@@ -42,6 +42,10 @@ class Audience:
         self.__customers: List[Customer] = []
 
     def create(self) -> List[Customer]:
+        '''
+        Cria o público alvo específico, alocando clientes com diferentes níveis de compulsividade,
+        que impactam na probabilidade de compra ao serem expostos ao portfólio de produtos.
+        '''
         possibilities = [Compulsivity.BAIXISSIMA, Compulsivity.BAIXA, Compulsivity.ALTA, Compulsivity.ALTISSIMA]
         _min = self.__total_customers // len(possibilities)
         available = [_min] * len(possibilities)
@@ -59,6 +63,9 @@ class Audience:
         return self.__customers
     
     def select_customer(self, lift=2) -> Customer:
+        '''
+        Encontra um cliente disposto a realizar uma compra.
+        '''
         possibilities: List[Customer] = []
         for customer in self.__customers:
             if customer.get_compulsivity() in [1, 2]:
@@ -71,14 +78,3 @@ class Audience:
                     possibilities.append(customer)
         
         return possibilities[np.random.randint(0, len(possibilities))]
-    
-    def get_data(self) -> pd.DataFrame:
-        data = []
-        columns = ["Nome", "Identificador", "Nível de Compulsividade"]
-        for customer in self.__customers:
-            data.append([
-                customer.get_name(),
-                customer.get_id(),
-                customer.get_compulsivity()
-            ])
-        return pd.DataFrame(data, columns=columns)
